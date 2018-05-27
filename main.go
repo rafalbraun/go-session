@@ -24,7 +24,7 @@ func main() {
 	}
 
 	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		rw.Write([]byte("test!"))
+		rw.Write([]byte("OK"))
 	})
 	loginHandler := handlers.Login{Name: cookieName,
 		Domain:   cookieDomain,
