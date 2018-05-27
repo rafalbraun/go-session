@@ -23,8 +23,23 @@ func main() {
 		panic(err)
 	}
 
-	loginHandler := handlers.Login{Name: cookieName, Domain: cookieDomain, Path: cookiePath, Value: cookieValue, Duration: time.Hour * time.Duration(cookieDurationInteger)}
-	logoutHandler := handlers.Logout{Name: cookieName, Domain: cookieDomain, Path: cookiePath}
+	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Write([]byte("test!"))
+	})
+	loginHandler := handlers.Login{Name: cookieName,
+		Domain:   cookieDomain,
+		Path:     cookiePath,
+		Value:    cookieValue,
+		Duration: time.Hour * time.Duration(cookieDurationInteger),
+		Next:     handler,
+	}
+
+	logoutHandler := handlers.Logout{
+		Name:   cookieName,
+		Domain: cookieDomain,
+		Path:   cookiePath,
+		Next:   handler,
+	}
 
 	http.Handle("/login", loginHandler)
 	http.Handle("/logout", logoutHandler)
