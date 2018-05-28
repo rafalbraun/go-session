@@ -27,18 +27,23 @@ func main() {
 		rw.Write([]byte("OK"))
 	})
 	loginHandler := handlers.Login{Name: cookieName,
-		Domain:   cookieDomain,
-		Path:     cookiePath,
-		Value:    cookieValue,
-		Duration: time.Hour * time.Duration(cookieDurationInteger),
-		Next:     handler,
+		Domain: cookieDomain,
+		Path:   cookiePath,
+		Value:  cookieValue,
+		Expires: func() time.Time {
+			return time.Now().Add(time.Hour * time.Duration(cookieDurationInteger))
+		},
+		Next: handler,
 	}
 
 	logoutHandler := handlers.Logout{
 		Name:   cookieName,
 		Domain: cookieDomain,
 		Path:   cookiePath,
-		Next:   handler,
+		Expires: func() time.Time {
+			return time.Now()
+		},
+		Next: handler,
 	}
 
 	http.Handle("/login", loginHandler)

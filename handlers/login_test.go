@@ -2,6 +2,7 @@ package handlers_test
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -13,13 +14,17 @@ import (
 
 func TestLogin(t *testing.T) {
 	expBody := []byte("test!")
+	now := time.Now().UTC()
+	expire := func() time.Time {
+		return now
+	}
 
 	loginHandler := handlers.Login{
-		Name:     "session",
-		Value:    "logged in",
-		Path:     "/",
-		Domain:   "test.com",
-		Duration: time.Hour * 1,
+		Name:    "session",
+		Value:   "logged in",
+		Path:    "/",
+		Domain:  "test.com",
+		Expires: expire,
 		Next: http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			rw.Write(expBody)
 		}),
@@ -30,13 +35,8 @@ func TestLogin(t *testing.T) {
 		t.Errorf("Failed to create test request: %v", err)
 	}
 
-	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
 	recorder := httptest.NewRecorder()
-
-	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
-	// directly and pass in our Request and ResponseRecorder.
 	loginHandler.ServeHTTP(recorder, testReq)
-
 	response := recorder.Result()
 
 	bodyBytes, err := ioutil.ReadAll(response.Body)
@@ -71,4 +71,24 @@ func TestLogin(t *testing.T) {
 	if cookie.Path != "/" {
 		t.Errorf("Cookie has the wrong domain. Expected %v, got %v", "/", cookie.Path)
 	}
+
+	if !compareCookieTimes(cookie.Expires.UTC(), now.UTC()) {
+		t.Errorf("Cookie has the wrong expiry time. Expected %v, got %v", now.UTC(), cookie.Expires.UTC())
+	}
+}
+
+func compareCookieTimes(t1, t2 time.Time) bool {
+	fmt.Println(t1.Year() == t2.Year())
+	fmt.Println(t1.Month() == t2.Month())
+	fmt.Println(t1.Day() == t2.Day())
+	fmt.Println(t1.Hour() == t2.Hour())
+	fmt.Println(t1.Minute() == t2.Minute())
+	fmt.Println(t1.Second() == t2.Second())
+
+	return t1.Year() == t2.Year() &&
+		t1.Month() == t2.Month() &&
+		t1.Day() == t2.Day() &&
+		t1.Hour() == t2.Hour() &&
+		t1.Minute() == t2.Minute() &&
+		t1.Second() == t2.Second()
 }
