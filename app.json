@@ -1,0 +1,6 @@
+{
+    "name": "go-session",
+    "description": "A sample Go web app to set and delete cookies",
+    "repository": "https://github.com/brafales/go-session",
+    "keywords": ["go", "golang"]
+  }
