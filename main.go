@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/brafales/go-session/handlers"
 )
@@ -30,20 +29,15 @@ func main() {
 		Domain: cookieDomain,
 		Path:   cookiePath,
 		Value:  cookieValue,
-		Expires: func() time.Time {
-			return time.Now().Add(time.Hour * time.Duration(cookieDurationInteger))
-		},
-		Next: handler,
+		MaxAge: cookieDurationInteger,
+		Next:   handler,
 	}
 
 	logoutHandler := handlers.Logout{
 		Name:   cookieName,
 		Domain: cookieDomain,
 		Path:   cookiePath,
-		Expires: func() time.Time {
-			return time.Now()
-		},
-		Next: handler,
+		Next:   handler,
 	}
 
 	http.Handle("/login", loginHandler)

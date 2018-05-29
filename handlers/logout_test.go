@@ -6,23 +6,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/brafales/go-session/handlers"
 )
 
 func TestLogout(t *testing.T) {
 	expBody := []byte("test!")
-	now := time.Now().UTC()
-	expire := func() time.Time {
-		return now
-	}
 
 	logoutHandler := handlers.Logout{
-		Name:    "session",
-		Path:    "/",
-		Domain:  "test.com",
-		Expires: expire,
+		Name:   "session",
+		Path:   "/",
+		Domain: "test.com",
 		Next: http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 			rw.Write(expBody)
 		}),
@@ -70,7 +64,7 @@ func TestLogout(t *testing.T) {
 		t.Errorf("Cookie has the wrong domain. Expected %v, got %v", "/", cookie.Path)
 	}
 
-	if !compareCookieTimes(cookie.Expires.UTC(), now.UTC()) {
-		t.Errorf("Cookie has the wrong expiry time. Expected %v, got %v", now.UTC(), cookie.Expires.UTC())
+	if cookie.MaxAge != 0 {
+		t.Errorf("Cookie has the wrong max age. Expected %v, got %v", 60, cookie.MaxAge)
 	}
 }
