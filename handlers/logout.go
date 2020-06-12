@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"html/template"
 	"net/http"
 )
 
@@ -23,4 +24,12 @@ func (l Logout) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(rw, &cookie)
 	l.Next.ServeHTTP(rw, r)
+}
+
+func LogoutHandler(rw http.ResponseWriter, r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("handlers/logout.html"))
+	err := tmpl.Execute(rw, nil)
+	if err != nil {
+		panic(err)
+	}
 }

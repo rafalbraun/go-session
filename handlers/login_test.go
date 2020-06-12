@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/brafales/go-session/handlers"
+	"go-session/handlers"
 )
 
 func TestLogin(t *testing.T) {

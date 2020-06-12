@@ -1,49 +1,44 @@
 package main
 
 import (
-	"fmt"
+	"go-session/handlers"
 	"net/http"
-	"os"
-	"strconv"
-
-	"github.com/brafales/go-session/handlers"
+	"time"
 )
 
 func main() {
-	cookieName := os.Getenv("COOKIE_NAME")
-	cookieValue := os.Getenv("COOKIE_VALUE")
-	cookieDomain := os.Getenv("COOKIE_DOMAIN")
-	cookiePath := os.Getenv("COOKIE_PATH")
-	cookieDuration := os.Getenv("COOKIE_DURATION")
+	cookieName := "session"
+	cookieValue := "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+	cookieDomain := ""
+	cookiePath := "/"
+	cookieDurationInteger := 520
+	cookieExpires := time.Now().Add(120 * time.Second)
 
-	cookieDurationInteger, err := strconv.Atoi(cookieDuration)
-
-	if err != nil {
-		panic(err)
-	}
-
-	handler := http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		rw.Write([]byte("OK"))
-	})
 	loginHandler := handlers.Login{Name: cookieName,
 		Domain: cookieDomain,
 		Path:   cookiePath,
 		Value:  cookieValue,
 		MaxAge: cookieDurationInteger,
-		Next:   handler,
+		Expires: cookieExpires,
+		Next:   http.HandlerFunc(handlers.LoginHandler),
 	}
 
 	logoutHandler := handlers.Logout{
 		Name:   cookieName,
 		Domain: cookieDomain,
 		Path:   cookiePath,
-		Next:   handler,
+		Next:   http.HandlerFunc(handlers.LogoutHandler),
 	}
 
+	indexHandler := handlers.Index{
+		IsLoggedIn: false,
+	}
+
+	http.Handle("/index", indexHandler)
 	http.Handle("/login", loginHandler)
 	http.Handle("/logout", logoutHandler)
 
-	address := fmt.Sprintf(":%s", os.Getenv("PORT"))
+	address := "localhost:8080"
 
 	if err := http.ListenAndServe(address, nil); err != nil {
 		panic(err)
